@@ -1,14 +1,14 @@
 from django.shortcuts import render, get_object_or_404
+
 from .models import Post, Group
 
+posts_per_page = 10
 
-# Create your views here.
+
 def index(request):
     template = 'posts/index.html'
-    posts = Post.objects.order_by('-pub_date')[:10]
+    posts = Post.objects.select_related()[:posts_per_page]
     context = {
-        'title': 'Последние обновления на сайте',
-        'text': 'Главная страница проекта',
         'posts': posts
     }
     return render(request, template, context)
@@ -17,9 +17,10 @@ def index(request):
 def group_posts(request, slug):
     template = 'posts/group_list.html'
     group = get_object_or_404(Group, slug=slug)
-    posts = Post.objects.filter(group=group).order_by('-pub_date')[:10]
+
+    posts = group.posts.all()[:posts_per_page]
+    # posts = Post.objects.filter(group=group)[:posts_per_page]
     context = {
-        'title': 'Публикации постов в сообществах',
         'group': group,
         'posts': posts
     }
